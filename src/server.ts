@@ -2,7 +2,7 @@ import express, {Request, RequestHandler, Response} from 'express';
 import mongoose from 'mongoose';
 import {completeOrder, createOrder, deleteOrder, getAllOrders, updateOrder} from './controllers/orderController';
 
-export function createServer(port: string, dbUrl: string) {
+export function createServer(port: number, dbUrl: string) {
     mongoose
         .connect(dbUrl)
         .then(() => console.log('Connected to MongoDB'))
