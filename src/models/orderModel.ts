@@ -26,4 +26,4 @@ const OrderSchema: Schema = new Schema({
     total: { type: Number, default: 0 },
 });
 
-export const OrderModel: Model<IOrder> = mongoose.model<IOrder>('Order', OrderSchema);
+export const OrderModel= mongoose.model<IOrder>('Order', OrderSchema);
