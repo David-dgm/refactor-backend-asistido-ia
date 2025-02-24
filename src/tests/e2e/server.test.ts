@@ -6,13 +6,14 @@ import mongoose from 'mongoose';
 
 dotenv.config({ path: '.env.test' });
 
-xdescribe('Status endpoint', () => {
+describe('Status endpoint', () => {
     let server: Server;
 
-    beforeAll(() => {
-        const dbUrl = process.env.DB_URL;
+    beforeAll(async () => {
+        const dbUrl = process.env.MONGODB_URI;
         const port = process.env.PORT;
-        server = createServer(Number(port), dbUrl as string);
+        console.log('DB URL:', dbUrl);
+        server = await createServer(Number(port), dbUrl as string);
     });
 
     afterAll(() => {
@@ -36,7 +37,7 @@ describe('POST /orders', () => {
     });
 
     afterAll(async () => {
-        await server.close();
+        server.close();
     });
 
     it('creates a new order successfully', async () => {
@@ -50,9 +51,11 @@ describe('POST /orders', () => {
             ],
             shippingAddress: "Irrelevant Street 123",
         };
+
         const response = await request(server)
             .post('/orders')
             .send(order);
+
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 100');
     });
@@ -69,11 +72,28 @@ describe('POST /orders', () => {
             shippingAddress: "Irrelevant Street 123",
             discountCode: 'DISCOUNT20'
         };
+
         const response = await request(server)
             .post('/orders')
             .send(order);
+
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 80');
     });
 
-})
+    it('does not allow to create an order when missing items', async () => {
+        const order = {
+            items: [],
+            shippingAddress: "Irrelevant Street 123",
+        };
+
+        const response = await request(server)
+            .post('/orders')
+            .send(order);
+
+        expect(response.status).toBe(400);
+        expect(response.text).toBe('The order must have at least one item');
+    });
+});
+
+
