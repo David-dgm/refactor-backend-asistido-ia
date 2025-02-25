@@ -28,28 +28,6 @@ describe('Status endpoint', () => {
     });
 });
 
-async function createValidOrder(server: Server, discountCode?: string) {
-    const order = {
-        items: [
-            {
-                productId: "1",
-                quantity: 1,
-                price: 100
-            }
-        ],
-        shippingAddress: "Irrelevant Street 123",
-        discountCode: discountCode
-    };
-
-    await request(server)
-        .post('/orders')
-        .send(order);
-
-    const response = await request(server)
-        .get('/orders');
-    return response.body[0];
-}
-
 describe('POST /orders', () => {
     let server: Server;
 
@@ -149,7 +127,7 @@ describe('DELETE /orders/:id', () => {
         expect(deleteResponse.text).toBe('Order deleted');
     });
 
-    it('returns an error when trying to delete a non-existing order', async () => {
+    it('does not allow to delete a non-existing order', async () => {
         const deleteResponse = await request(server)
             .delete(`/orders/123`);
 
@@ -157,3 +135,20 @@ describe('DELETE /orders/:id', () => {
         expect(deleteResponse.text).toBe('Order not found');
     });
 })
+
+async function createValidOrder(server: Server, discountCode?: string) {
+    const order = {
+        items: [
+            {
+                productId: "1",
+                quantity: 1,
+                price: 100
+            }
+        ],
+        shippingAddress: "Irrelevant Street 123",
+        discountCode: discountCode
+    };
+    await request(server).post('/orders').send(order);
+    const response = await request(server).get('/orders');
+    return response.body[0];
+}

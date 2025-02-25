@@ -99,6 +99,11 @@ export const completeOrder = async (req: Request, res: Response) => {
 // Delete order
 export const deleteOrder = async (req: Request, res: Response) => {
     console.log("DELETE /orders/:id");
-    await OrderModel.findByIdAndDelete(req.params.id);
-    res.send('Order deleted');
+    try{
+        await OrderModel.findByIdAndDelete(req.params.id);
+        res.send('Order deleted');
+    }
+    catch (error) {
+        res.status(400).send('Order not found')
+    }
 };
