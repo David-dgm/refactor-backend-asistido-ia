@@ -28,6 +28,25 @@ describe('Status endpoint', () => {
     });
 });
 
+async function createValidOrder(server: Server, discountCode?: string) {
+    const order = {
+        items: [
+            {
+                productId: "1",
+                quantity: 1,
+                price: 100
+            }
+        ],
+        shippingAddress: "Irrelevant Street 123",
+        discountCode: discountCode
+    };
+
+    const response = await request(server)
+        .post('/orders')
+        .send(order);
+    return response;
+}
+
 describe('POST /orders', () => {
     let server: Server;
 
@@ -41,41 +60,14 @@ describe('POST /orders', () => {
     });
 
     it('creates a new order successfully', async () => {
-        const order = {
-            items: [
-                {
-                    productId: "1",
-                    quantity: 1,
-                    price: 100
-                }
-            ],
-            shippingAddress: "Irrelevant Street 123",
-        };
-
-        const response = await request(server)
-            .post('/orders')
-            .send(order);
+        const response = await createValidOrder(server);
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 100');
     });
 
     it('creates a new order with discount successfully', async () => {
-        const order = {
-            items: [
-                {
-                    productId: "1",
-                    quantity: 1,
-                    price: 100
-                }
-            ],
-            shippingAddress: "Irrelevant Street 123",
-            discountCode: 'DISCOUNT20'
-        };
-
-        const response = await request(server)
-            .post('/orders')
-            .send(order);
+        const response = await createValidOrder(server, 'DISCOUNT20');
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 80');
@@ -122,20 +114,7 @@ describe('GET /orders', () => {
     });
 
     it('list one order after creating it', async () => {
-        const order = {
-            items: [
-                {
-                    productId: "1",
-                    quantity: 1,
-                    price: 100
-                }
-            ],
-            shippingAddress: "Irrelevant Street 123",
-        };
-
-        await request(server)
-            .post('/orders')
-            .send(order);
+        await createValidOrder(server);
 
         const response = await request(server)
             .get('/orders');
