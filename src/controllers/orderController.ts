@@ -88,7 +88,7 @@ export const completeOrder = async (req: Request, res: Response) => {
     }
 
     if (order.status !== 'CREATED') {
-        return res.send(`Cannot complete an order with status: ${order.status}`);
+        return res.status(400).send(`Cannot complete an order with status: ${order.status}`);
     }
 
     order.status = 'COMPLETED';
