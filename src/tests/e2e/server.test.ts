@@ -41,10 +41,13 @@ async function createValidOrder(server: Server, discountCode?: string) {
         discountCode: discountCode
     };
 
-    const response = await request(server)
+    await request(server)
         .post('/orders')
         .send(order);
-    return response;
+
+    const response = await request(server)
+        .get('/orders');
+    return response.body[0];
 }
 
 describe('POST /orders', () => {
@@ -123,3 +126,34 @@ describe('GET /orders', () => {
         expect(response.body.length).toBe(1);
     });
 });
+
+describe('DELETE /orders/:id', () => {
+    let server: Server;
+
+    beforeAll(async () => {
+        const dbUrl = process.env.MONGODB_URI as string;
+        server = await createServer(3004, dbUrl);
+    });
+
+    afterAll(async () => {
+        server.close();
+    });
+
+    it('deletes an order successfully', async () => {
+        const order = await createValidOrder(server);
+
+        const deleteResponse = await request(server)
+            .delete(`/orders/${order._id}`);
+
+        expect(deleteResponse.status).toBe(200);
+        expect(deleteResponse.text).toBe('Order deleted');
+    });
+
+    it('returns an error when trying to delete a non-existing order', async () => {
+        const deleteResponse = await request(server)
+            .delete(`/orders/123`);
+
+        expect(deleteResponse.status).toBe(400);
+        expect(deleteResponse.text).toBe('Order not found');
+    });
+})
