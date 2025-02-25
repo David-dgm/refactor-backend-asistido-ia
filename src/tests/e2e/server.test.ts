@@ -96,4 +96,51 @@ describe('POST /orders', () => {
     });
 });
 
+describe('GET /orders', () => {
+    let server: Server;
 
+    beforeAll(async () => {
+        const dbUrl = process.env.MONGODB_URI as string;
+        server = await createServer(3003, dbUrl);
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterEach(async () => {
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterAll(async () => {
+        server.close();
+    });
+
+    it('lists no orders when store is empty', async () => {
+        const response = await request(server)
+            .get('/orders');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([]);
+    });
+
+    it('list one order after creating it', async () => {
+        const order = {
+            items: [
+                {
+                    productId: "1",
+                    quantity: 1,
+                    price: 100
+                }
+            ],
+            shippingAddress: "Irrelevant Street 123",
+        };
+
+        await request(server)
+            .post('/orders')
+            .send(order);
+
+        const response = await request(server)
+            .get('/orders');
+
+        expect(response.status).toBe(200);
+        expect(response.body.length).toBe(1);
+    });
+});
