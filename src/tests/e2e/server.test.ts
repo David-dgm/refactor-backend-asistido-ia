@@ -184,6 +184,57 @@ describe('POST /orders/:id/complete', () => {
     });
 });
 
+describe('PUT /orders/:id', () => {
+    let server: Server;
+
+    beforeAll(async () => {
+        const dbUrl = process.env.MONGODB_URI as string;
+        server = await createServer(3006, dbUrl);
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterEach(async () => {
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterAll(async () => {
+        server.close();
+    });
+
+    it('updates an order successfully', async () => {
+        const order = await createValidOrder(server);
+
+        const updateResponse = await request(server)
+            .put(`/orders/${order._id}`)
+            .send({ status: 'COMPLETED' });
+
+        expect(updateResponse.status).toBe(200);
+        expect(updateResponse.text).toBe(`Order updated. New status: COMPLETED`);
+    });
+
+    it('does not allow to complete an order without items', async () => {
+        const order = await createValidOrder(server);
+
+        const updateResponse = await request(server)
+            .put(`/orders/${order._id}`)
+            .send({ status: 'COMPLETED' });
+
+        expect(updateResponse.status).toBe(400);
+        expect(updateResponse.text).toBe(`Cannot complete an order without items`);
+    });
+
+    it('updates an order with discount code successfully', async () => {
+        const order = await createValidOrder(server);
+
+        const updateResponse = await request(server)
+            .put(`/orders/${order._id}`)
+            .send({ discountCode: 'DISCOUNT20' });
+
+        expect(updateResponse.status).toBe(200);
+        expect(updateResponse.text).toBe(`Order updated. New status: CREATED`);
+    });
+});
+
 async function createValidOrder(server: Server, discountCode?: string) {
     const order = {
         items: [
