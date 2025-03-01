@@ -34,6 +34,11 @@ describe('POST /orders', () => {
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
         server = await createServer(3002, dbUrl);
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterEach(async () => {
+        await mongoose.connection.dropDatabase();
     });
 
     afterAll(async () => {
@@ -41,14 +46,35 @@ describe('POST /orders', () => {
     });
 
     it('creates a new order successfully', async () => {
-        const response = await createValidOrder(server);
+        const order = {
+            items: [
+                {
+                    productId: "1",
+                    quantity: 1,
+                    price: 100
+                }
+            ],
+            shippingAddress: "Irrelevant Street 123",
+        };
+        const response = await request(server).post('/orders').send(order);
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 100');
     });
 
     it('creates a new order with discount successfully', async () => {
-        const response = await createValidOrder(server, 'DISCOUNT20');
+        const order = {
+            items: [
+                {
+                    productId: "1",
+                    quantity: 1,
+                    price: 100
+                }
+            ],
+            shippingAddress: "Irrelevant Street 123",
+            discountCode: 'DISCOUNT20'
+        };
+        const response = await request(server).post('/orders').send(order);
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Order created with total: 80');
@@ -111,6 +137,11 @@ describe('DELETE /orders/:id', () => {
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
         server = await createServer(3004, dbUrl);
+        await mongoose.connection.dropDatabase();
+    });
+
+    afterEach(async () => {
+        await mongoose.connection.dropDatabase();
     });
 
     afterAll(async () => {
@@ -129,12 +160,12 @@ describe('DELETE /orders/:id', () => {
 
     it('does not allow to delete a non-existing order', async () => {
         const deleteResponse = await request(server)
-            .delete(`/orders/123`);
+            .delete(`/orders/1234`);
 
         expect(deleteResponse.status).toBe(400);
         expect(deleteResponse.text).toBe('Order not found');
     });
-})
+});
 
 describe('POST /orders/:id/complete', () => {
     let server: Server;

@@ -81,16 +81,13 @@ export const updateOrder = async (req: Request, res: Response) => {
 export const completeOrder = async (req: Request, res: Response) => {
     console.log("POST /orders/:id/complete");
     const { id } = req.params;
-
     const order = await OrderModel.findById(id);
     if (!order) {
         return res.status(400).send('Order not found to complete');
     }
-
     if (order.status !== 'CREATED') {
         return res.status(400).send(`Cannot complete an order with status: ${order.status}`);
     }
-
     order.status = 'COMPLETED';
     await order.save();
     res.send(`Order with id ${id} completed`);
@@ -99,11 +96,11 @@ export const completeOrder = async (req: Request, res: Response) => {
 // Delete order
 export const deleteOrder = async (req: Request, res: Response) => {
     console.log("DELETE /orders/:id");
-    try{
-        await OrderModel.findByIdAndDelete(req.params.id);
-        res.send('Order deleted');
+    const { id } = req.params;
+    const order = await OrderModel.findById(id);
+    if (!order) {
+        return res.status(400).send('Order not found')
     }
-    catch (error) {
-        res.status(400).send('Order not found')
-    }
+    await OrderModel.findByIdAndDelete(req.params.id);
+    res.send('Order deleted');
 };
