@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import {OrderStatus} from "../domain/models";
 
 export interface IOrder extends Document {
     _id: string;
@@ -22,7 +23,7 @@ const OrderSchema: Schema = new Schema({
             price: { type: Number },
         },
     ],
-    status: { type: String, default: 'CREATED' },
+    status: { type: String, default: OrderStatus.Created },
     discountCode: { type: String, required: false },
     shippingAddress: { type: String },
     total: { type: Number, default: 0 },

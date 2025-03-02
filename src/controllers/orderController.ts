@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { OrderModel } from '../models/orderModel';
+import {OrderStatus} from "../domain/models";
 
 // Create a new order
 export const createOrder = async (req: Request, res: Response) => {
@@ -53,7 +54,7 @@ export const updateOrder = async (req: Request, res: Response) => {
     }
 
     if (status) {
-        if (status === 'COMPLETED' && order.items.length === 0) {
+        if (status === OrderStatus.Completed && order.items.length === 0) {
             return res.send('Cannot complete an order without items');
         }
         order.status = status;
@@ -85,10 +86,10 @@ export const completeOrder = async (req: Request, res: Response) => {
     if (!order) {
         return res.status(400).send('Order not found to complete');
     }
-    if (order.status !== 'CREATED') {
+    if (order.status !== OrderStatus.Created) {
         return res.status(400).send(`Cannot complete an order with status: ${order.status}`);
     }
-    order.status = 'COMPLETED';
+    order.status = OrderStatus.Completed;
     await order.save();
     res.send(`Order with id ${id} completed`);
 };

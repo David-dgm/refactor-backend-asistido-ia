@@ -3,6 +3,7 @@ import {createServer} from '../../server';
 import dotenv from 'dotenv';
 import {Server} from "http";
 import mongoose from 'mongoose';
+import {OrderStatus} from "../../domain/models";
 
 dotenv.config({ path: '.env.test' });
 
@@ -237,7 +238,7 @@ describe('PUT /orders/:id', () => {
 
         const updateResponse = await request(server)
             .put(`/orders/${order._id}`)
-            .send({ status: 'COMPLETED' });
+            .send({ status: OrderStatus.Completed });
 
         expect(updateResponse.status).toBe(200);
         expect(updateResponse.text).toBe(`Order updated. New status: COMPLETED`);
@@ -268,7 +269,7 @@ describe('PUT /orders/:id', () => {
     it('does not allow to update a non-existing order', async () => {
         const updateResponse = await request(server)
             .put(`/orders/123`)
-            .send({ status: 'COMPLETED' });
+            .send({ status: OrderStatus.Completed });
 
         expect(updateResponse.status).toBe(400);
         expect(updateResponse.text).toBe('Order not found');
