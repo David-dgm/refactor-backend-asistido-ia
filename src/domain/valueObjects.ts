@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import {DomainError} from "./error";
 
 export class PositiveNumber {
@@ -20,5 +21,13 @@ export class Address {
             throw new DomainError("Address cannot be empty");
         }
         return new Address(value);
+    }
+}
+
+export class Id{
+    private constructor(readonly value: string) {}
+
+    static create(): Id {
+        return new Id(uuid());
     }
 }
