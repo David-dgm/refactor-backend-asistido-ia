@@ -1,4 +1,4 @@
-import {Address, Id, PositiveNumber} from "../../domain/valueObjects";
+import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
 
 describe("A positive number", () => {
     it("allows positive values", ()=>{
@@ -8,6 +8,15 @@ describe("A positive number", () => {
 
     it("does not allow negative values", ()=>{
         expect(() => PositiveNumber.create(-1)).toThrowError("Negative numbers are not allowed");
+    });
+
+    it("multiplies two positive numbers", ()=>{
+        const aPositiveNumber = PositiveNumber.create(2);
+        const anotherPositiveNumber = PositiveNumber.create(3);
+
+        const result = aPositiveNumber.multiply(anotherPositiveNumber);
+
+        expect(result.value).toBe(6);
     });
 });
 
@@ -32,3 +41,16 @@ describe("An id", () => {
     });
 });
 
+describe("An order line", () => {
+    it('calculates subtotal', () => {
+        const productId = Id.create();
+        const quantity = PositiveNumber.create(2);
+        const price = PositiveNumber.create(3);
+
+        const orderLine = new OrderLine(productId, quantity, price);
+
+        const total = orderLine.calculateSubtotal();
+
+        expect(total.value).toBe(6);
+    });
+});

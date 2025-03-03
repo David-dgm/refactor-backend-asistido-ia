@@ -10,6 +10,10 @@ export class PositiveNumber {
         }
         return new PositiveNumber(value);
     }
+
+    multiply(number: PositiveNumber): PositiveNumber {
+        return PositiveNumber.create(this.value * number.value);
+    }
 }
 
 export class Address {
@@ -29,5 +33,17 @@ export class Id{
 
     static create(): Id {
         return new Id(uuid());
+    }
+}
+
+export class OrderLine{
+    constructor(
+        readonly productId:Id,
+        readonly quantity: PositiveNumber,
+        readonly price: PositiveNumber
+    ) {}
+
+    calculateSubtotal(): PositiveNumber {
+        return this.price.multiply(this.quantity);
     }
 }
