@@ -22,3 +22,4 @@ describe("An address", () => {
         expect(() => Address.create("     ")).toThrowError("Address cannot be empty");
     });
 });
+
