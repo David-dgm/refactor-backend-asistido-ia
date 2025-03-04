@@ -48,4 +48,15 @@ describe("The order", ()=>{
 
         expect(order.calculatesTotal()).toEqual(PositiveNumber.create(8));
     });
+
+    it("calculates the total price of a given order with a discount code", ()=>{
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(4)),
+            new OrderLine(Id.create(), PositiveNumber.create(1), PositiveNumber.create(2)),
+        ];
+        const shippingAddress = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, shippingAddress, "DISCOUNT20");
+
+        expect(order.calculatesTotal()).toEqual(PositiveNumber.create(8));
+    });
 })

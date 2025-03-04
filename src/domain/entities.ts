@@ -19,8 +19,12 @@ export class Order{
     }
 
     calculatesTotal() {
-        return this.items.reduce((total, item) =>
+        const total = this.items.reduce((total, item) =>
             total.add(item.calculateSubtotal()), PositiveNumber.create(0));
+        if (this.discountCode === 'DISCOUNT20') {
+            return total.multiply(PositiveNumber.create(0.8));
+        }
+        return total;
     }
 }
 
