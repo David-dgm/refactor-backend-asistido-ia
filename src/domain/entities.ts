@@ -55,5 +55,25 @@ export class Order{
             discountCode: this.discountCode,
         };
     }
+
+    static fromDto(dto: {
+        discountCode: "DISCOUNT20" | undefined;
+        shippingAddress: string;
+        id: string;
+        items: { quantity: number; productId: string; price: number }[];
+        status: OrderStatus
+    }) {
+        return new Order(
+            Id.from(dto.id),
+            dto.items.map(item => new OrderLine(
+                Id.from(item.productId),
+                PositiveNumber.create(item.quantity),
+                PositiveNumber.create(item.price)
+            )),
+            Address.create(dto.shippingAddress),
+            dto.status,
+            dto.discountCode
+        );
+    }
 }
 
