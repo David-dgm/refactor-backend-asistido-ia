@@ -1,34 +1,40 @@
 import { Request, Response } from 'express';
 import { OrderModel } from '../models/orderModel';
 import {OrderStatus} from "../domain/models";
+import {Address, Id, OrderLine, PositiveNumber} from "../domain/valueObjects";
+import {Order} from "../domain/entities";
+import {DomainError} from "../domain/error";
 
 // Create a new order
 export const createOrder = async (req: Request, res: Response) => {
     console.log("POST /orders");
-    const { items, discountCode, shippingAddress } = req.body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).send('The order must have at least one item');
+    try {
+        const {items, discountCode, shippingAddress} = req.body;
+        const orderLines = items.map((item: any) => (
+            new OrderLine(
+                Id.from(item.productId),
+                PositiveNumber.create(item.quantity),
+                PositiveNumber.create(item.price)
+            )
+        ));
+        const order = Order.create(orderLines, Address.create(shippingAddress), discountCode);
+        const orderDto = order.toDto();
+        const newOrder = new OrderModel({
+            _id: orderDto.id,
+            items: orderDto.items,
+            discountCode: orderDto.discountCode,
+            shippingAddress: orderDto.shippingAddress,
+            total: order.calculatesTotal().value,
+        });
+        await newOrder.save();
+        res.send(`Order created with total: ${order.calculatesTotal().value}`);
     }
-
-    let total = 0;
-    for (const item of items) {
-        total += (item.price || 0) * (item.quantity || 0);
+    catch (error) {
+        if(error instanceof DomainError) {
+            return res.status(400).send(error.message);
+        }
+        res.status(500).send("Unexpected error");
     }
-
-    if (discountCode === 'DISCOUNT20') {
-        total = total * 0.8;
-    }
-
-    const newOrder = new OrderModel({
-        items,
-        discountCode,
-        shippingAddress,
-        total,
-    });
-
-    await newOrder.save();
-    res.send(`Order created with total: ${total}`);
 };
 
 // Get all orders

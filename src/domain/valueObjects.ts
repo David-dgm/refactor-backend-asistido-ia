@@ -38,6 +38,10 @@ export class Id{
     static create(): Id {
         return new Id(uuid());
     }
+
+    static from(value: string): Id {
+        return new Id(value);
+    }
 }
 
 export class OrderLine{
