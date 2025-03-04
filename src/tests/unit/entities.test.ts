@@ -18,7 +18,6 @@ describe("The order", ()=>{
         expect(order.items).toEqual(items);
         expect(order.shippingAddress).toEqual(shippingAddress);
         expect(order.discountCode).toBe(discountCode);
-        expect(order.status).toBe(OrderStatus.Created);
     });
 
     it("does not allow to create an order when no items are provided", ()=>{
@@ -58,5 +57,17 @@ describe("The order", ()=>{
         const order = Order.create(items, shippingAddress, "DISCOUNT20");
 
         expect(order.calculatesTotal()).toEqual(PositiveNumber.create(8));
+    });
+
+    it("completes a given order with created status", ()=>{
+       const items = [
+              new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(4)),
+       ];
+       const shippingAddress = Address.create("Irrelevant Street 123");
+       const order = Order.create(items, shippingAddress);
+
+       order.complete();
+
+       expect(order.isCompleted()).toBe(true);
     });
 })

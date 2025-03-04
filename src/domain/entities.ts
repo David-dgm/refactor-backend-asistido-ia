@@ -7,7 +7,7 @@ export class Order{
         readonly id:Id,
         readonly items: OrderLine[],
         readonly shippingAddress: Address,
-        readonly status: OrderStatus,
+        private status: OrderStatus,
         readonly discountCode?: DiscountCode,
     ) {}
 
@@ -29,6 +29,14 @@ export class Order{
             return total.multiply(PositiveNumber.create(0.8));
         }
         return total;
+    }
+
+    complete() {
+        this.status = OrderStatus.Completed;
+    }
+
+    isCompleted() {
+        return this.status === OrderStatus.Completed;
     }
 }
 
