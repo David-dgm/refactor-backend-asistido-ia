@@ -16,7 +16,16 @@ describe("A positive number", () => {
 
         const result = aPositiveNumber.multiply(anotherPositiveNumber);
 
-        expect(result.value).toBe(6);
+        expect(result).toEqual(PositiveNumber.create(6));
+    });
+
+    it("adds two given positive numbers", ()=>{
+        const aPositiveNumber = PositiveNumber.create(2);
+        const anotherPositiveNumber = PositiveNumber.create(3);
+
+        const result = aPositiveNumber.add(anotherPositiveNumber);
+
+        expect(result).toEqual(PositiveNumber.create(5));
     });
 });
 

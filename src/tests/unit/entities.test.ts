@@ -27,4 +27,25 @@ describe("The order", ()=>{
 
         expect(() => Order.create(items, shippingAddress)).toThrow("The order must have at least one item");
     });
+
+    it("calculates the total price of a given order with a single line", ()=>{
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const shippingAddress = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, shippingAddress);
+
+        expect(order.calculatesTotal()).toEqual(PositiveNumber.create(6));
+    });
+
+    it("calculates the total price of a given order with multiple lines", ()=>{
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+            new OrderLine(Id.create(), PositiveNumber.create(1), PositiveNumber.create(2)),
+        ];
+        const shippingAddress = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, shippingAddress);
+
+        expect(order.calculatesTotal()).toEqual(PositiveNumber.create(8));
+    });
 })
