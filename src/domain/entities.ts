@@ -26,6 +26,20 @@ export class Order{
         return new Order(Id.create(), items, shippingAddress, OrderStatus.Created, discountCode);
     }
 
+    static fromDto(dto: OrderDto) {
+        return new Order(
+            Id.from(dto.id),
+            dto.items.map(item => new OrderLine(
+                Id.from(item.productId),
+                PositiveNumber.create(item.quantity),
+                PositiveNumber.create(item.price)
+            )),
+            Address.create(dto.shippingAddress),
+            dto.status,
+            dto.discountCode
+        );
+    }
+
     calculatesTotal() {
         const total = this.items.reduce((total, item) =>
             total.add(item.calculateSubtotal()), PositiveNumber.create(0));
@@ -62,20 +76,6 @@ export class Order{
             status: this.status,
             discountCode: this.discountCode,
         };
-    }
-
-    static fromDto(dto: OrderDto) {
-        return new Order(
-            Id.from(dto.id),
-            dto.items.map(item => new OrderLine(
-                Id.from(item.productId),
-                PositiveNumber.create(item.quantity),
-                PositiveNumber.create(item.price)
-            )),
-            Address.create(dto.shippingAddress),
-            dto.status,
-            dto.discountCode
-        );
     }
 }
 

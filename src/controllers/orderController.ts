@@ -84,21 +84,43 @@ export const updateOrder = async (req: Request, res: Response) => {
     res.send(`Order updated. New status: ${order.status}`);
 };
 
-// Complete order
 export const completeOrder = async (req: Request, res: Response) => {
     console.log("POST /orders/:id/complete");
-    const { id } = req.params;
-    const order = await OrderModel.findById(id);
-    if (!order) {
-        return res.status(400).send('Order not found to complete');
+    try {
+        const {id} = req.params;
+        const orderDocument = await OrderModel.findById(id);
+        if (!orderDocument) {
+            return res.status(400).send('Order not found to complete');
+        }
+        const orderDto = {
+            id: orderDocument._id,
+            items: orderDocument.items,
+            shippingAddress: orderDocument.shippingAddress,
+            status: orderDocument.status as OrderStatus,
+            discountCode: orderDocument.discountCode,
+        }
+        const order = Order.fromDto(orderDto);
+        order.complete();
+        const orderDtoToUpdate = order.toDto();
+        const orderDocumentToUpdate = new OrderModel({
+            _id: orderDtoToUpdate.id,
+            items: orderDtoToUpdate.items,
+            discountCode: orderDtoToUpdate.discountCode,
+            shippingAddress: orderDtoToUpdate.shippingAddress,
+            total: order.calculatesTotal().value,
+            status: orderDtoToUpdate.status,
+        })
+        await OrderModel.findOneAndReplace({_id: id}, orderDocumentToUpdate, {new: true});
+        res.send(`Order with id ${id} completed`);
     }
-    if (order.status !== OrderStatus.Created) {
-        return res.status(400).send(`Cannot complete an order with status: ${order.status}`);
+    catch (error) {
+        if(error instanceof DomainError) {
+            return res.status(400).send(error.message);
+        }
+        res.status(500).send("Unexpected error");
     }
-    order.status = OrderStatus.Completed;
-    await order.save();
-    res.send(`Order with id ${id} completed`);
 };
+
 
 // Delete order
 export const deleteOrder = async (req: Request, res: Response) => {

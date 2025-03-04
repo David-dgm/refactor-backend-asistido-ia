@@ -15,7 +15,9 @@ export async function createServer(port: number, dbUrl: string) {
     })(req, res)) as RequestHandler);
     app.get('/orders', ((req: Request, res: Response) => getAllOrders(req, res)) as RequestHandler);
     app.put('/orders/:id', ((req: Request, res: Response) => updateOrder(req, res)) as RequestHandler);
-    app.post('/orders/:id/complete', ((req: Request, res: Response) => completeOrder(req, res)) as RequestHandler);
+    app.post('/orders/:id/complete', ((req: Request, res: Response) => (async (req: Request, res: Response) => {
+        return completeOrder(req, res);
+    })(req, res)) as RequestHandler);
     app.delete('/orders/:id', ((req: Request, res: Response) => deleteOrder(req, res)) as RequestHandler);
     app.get('/', ((req: Request, res: Response) => {
         console.log("GET /");
