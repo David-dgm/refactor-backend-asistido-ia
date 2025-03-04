@@ -41,5 +41,19 @@ export class Order{
     isCompleted() {
         return this.status === OrderStatus.Completed;
     }
+
+    toDto() {
+        return {
+            id: this.id.value,
+            items: this.items.map(item => ({
+                productId: item.productId.value,
+                quantity: item.quantity.value,
+                price: item.price.value,
+            })),
+            shippingAddress: this.shippingAddress.value,
+            status: this.status,
+            discountCode: this.discountCode,
+        };
+    }
 }
 
