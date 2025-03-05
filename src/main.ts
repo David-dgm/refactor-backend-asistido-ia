@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import {createServer} from "./server";
+import {createServer} from "./infrastructure/server";
 
 export const DB_URL = process.env.DB_URL
 export const PORT = process.env.port

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import {createServer} from '../../server';
+import {createServer} from '../../infrastructure/server';
 import dotenv from 'dotenv';
 import {Server} from "http";
 import mongoose from 'mongoose';
