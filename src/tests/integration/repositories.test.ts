@@ -44,4 +44,19 @@ describe("The order Mongo Repository", ()=>{
         expect(orders.length).toBe(1);
         expect(orders[0].toDto()).toEqual(order.toDto());
     });
+
+    it("deletes a previously saved order", async ()=>{
+        //Arrange
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const address = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, address);
+        await repository.save(order);
+        //Act
+        await repository.delete(order.id);
+        //Assert
+        const orders = await repository.findAll();
+        expect(orders.length).toBe(0);
+    });
 });

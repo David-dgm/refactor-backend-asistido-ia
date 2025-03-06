@@ -80,7 +80,7 @@ export class OrderMongoRepository implements OrderRepository {
         });
     }
 
-    delete(id: Id): Promise<void> {
-        throw new Error("Method not implemented.");
+    async delete(id: Id): Promise<void> {
+        await this.mongooseModel().deleteOne({_id: id.value});
     }
 }
