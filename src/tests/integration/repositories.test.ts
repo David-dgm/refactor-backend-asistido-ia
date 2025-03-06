@@ -4,10 +4,17 @@ import mongoose from "mongoose";
 import {OrderMongoRepository} from "../../infrastructure/repositories/orderMongoRepository";
 
 describe("The order Mongo Repository", ()=>{
+    let repository: OrderMongoRepository;
+
     beforeAll(async ()=>{
         const dbUrl = "mongodb://127.0.0.1:27017/db_orders_mongo_repository";
         await mongoose.connect(dbUrl);
-        await mongoose.connection.dropDatabase()
+        await mongoose.connection.dropDatabase();
+        repository = await OrderMongoRepository.create(dbUrl);
+    });
+
+    afterEach(async ()=>{
+        await mongoose.connection.dropDatabase();
     });
 
     it("saves and retrieve a given new valid order", async ()=>{
@@ -17,7 +24,6 @@ describe("The order Mongo Repository", ()=>{
         ];
         const address = Address.create("Irrelevant Street 123");
         const order = Order.create(items, address);
-        const repository = new OrderMongoRepository();
         //Act
         await repository.save(order);
         //Assert
