@@ -12,11 +12,11 @@ type OrderDto = {
 
 export class Order{
     private constructor(
-        readonly id:Id,
+        private id:Id,
         readonly items: OrderLine[],
-        readonly shippingAddress: Address,
+        private shippingAddress: Address,
         private status: OrderStatus,
-        readonly discountCode?: DiscountCode,
+        private discountCode?: DiscountCode,
     ) {}
 
     static create(items: OrderLine[], shippingAddress: Address, discountCode?: DiscountCode): Order {
@@ -76,6 +76,18 @@ export class Order{
             status: this.status,
             discountCode: this.discountCode,
         };
+    }
+
+    updateShippingAddress(newAddress: Address) {
+        this.shippingAddress = newAddress;
+    }
+
+    updateDiscountCode(discount: DiscountCode) {
+        this.discountCode = discount;
+    }
+
+    getId() {
+        return this.id;
     }
 }
 

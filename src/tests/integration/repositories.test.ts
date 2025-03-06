@@ -26,7 +26,7 @@ describe("The order Mongo Repository", ()=>{
         //Act
         await repository.save(order);
         //Assert
-        const savedOrder = await repository.findById(order.id);
+        const savedOrder = await repository.findById(order.getId());
         expect(savedOrder?.toDto()).toEqual(order.toDto());
     });
 
@@ -54,9 +54,25 @@ describe("The order Mongo Repository", ()=>{
         const order = Order.create(items, address);
         await repository.save(order);
         //Act
-        await repository.delete(order.id);
+        await repository.delete(order.getId());
         //Assert
         const orders = await repository.findAll();
         expect(orders.length).toBe(0);
+    });
+
+    it("updates a previously saved order", async ()=>{
+        //Arrange
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const address = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, address);
+        await repository.save(order);
+        //Act
+        order.updateShippingAddress(Address.create("New Street 456"));
+        await repository.save(order);
+        //Assert
+        const updatedOrder = await repository.findById(order.getId());
+        expect(updatedOrder?.toDto()).toEqual(order.toDto());
     });
 });
