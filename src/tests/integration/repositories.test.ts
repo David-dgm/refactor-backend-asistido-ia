@@ -8,9 +8,8 @@ describe("The order Mongo Repository", ()=>{
 
     beforeAll(async ()=>{
         const dbUrl = "mongodb://127.0.0.1:27017/db_orders_mongo_repository";
-        await mongoose.connect(dbUrl);
-        await mongoose.connection.dropDatabase();
         repository = await OrderMongoRepository.create(dbUrl);
+        await mongoose.connection.dropDatabase();
     });
 
     afterEach(async ()=>{
@@ -29,5 +28,20 @@ describe("The order Mongo Repository", ()=>{
         //Assert
         const savedOrder = await repository.findById(order.id);
         expect(savedOrder?.toDto()).toEqual(order.toDto());
+    });
+
+    it("finds all previously saved orders", async ()=>{
+        //Arrange
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const address = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, address);
+        await repository.save(order);
+        //Act
+        const orders = await repository.findAll();
+        //Assert
+        expect(orders.length).toBe(1);
+        expect(orders[0].toDto()).toEqual(order.toDto());
     });
 });
