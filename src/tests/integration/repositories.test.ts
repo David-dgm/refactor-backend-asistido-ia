@@ -18,11 +18,7 @@ describe("The order Mongo Repository", ()=>{
 
     it("saves and retrieve a given new valid order", async ()=>{
         //Arrange
-        const items = [
-            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
-        ];
-        const address = Address.create("Irrelevant Street 123");
-        const order = Order.create(items, address);
+        const order = await createValidOrder(repository);
         //Act
         await repository.save(order);
         //Assert
@@ -32,12 +28,7 @@ describe("The order Mongo Repository", ()=>{
 
     it("finds all previously saved orders", async ()=>{
         //Arrange
-        const items = [
-            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
-        ];
-        const address = Address.create("Irrelevant Street 123");
-        const order = Order.create(items, address);
-        await repository.save(order);
+        const order = await createValidOrder(repository);
         //Act
         const orders = await repository.findAll();
         //Assert
@@ -47,12 +38,7 @@ describe("The order Mongo Repository", ()=>{
 
     it("deletes a previously saved order", async ()=>{
         //Arrange
-        const items = [
-            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
-        ];
-        const address = Address.create("Irrelevant Street 123");
-        const order = Order.create(items, address);
-        await repository.save(order);
+        const order = await createValidOrder(repository);
         //Act
         await repository.delete(order.getId());
         //Assert
@@ -62,12 +48,7 @@ describe("The order Mongo Repository", ()=>{
 
     it("updates a previously saved order", async ()=>{
         //Arrange
-        const items = [
-            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
-        ];
-        const address = Address.create("Irrelevant Street 123");
-        const order = Order.create(items, address);
-        await repository.save(order);
+        const order = await createValidOrder(repository);
         //Act
         order.updateShippingAddress(Address.create("New Street 456"));
         await repository.save(order);
@@ -76,3 +57,13 @@ describe("The order Mongo Repository", ()=>{
         expect(updatedOrder?.toDto()).toEqual(order.toDto());
     });
 });
+
+async function createValidOrder(repository: OrderMongoRepository) {
+    const items = [
+        new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+    ];
+    const address = Address.create("Irrelevant Street 123");
+    const order = Order.create(items, address);
+    await repository.save(order);
+    return order;
+}
