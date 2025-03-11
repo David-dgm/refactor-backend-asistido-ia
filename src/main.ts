@@ -5,7 +5,7 @@ dotenv.config({
     path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env'
 });
 
-export const DB_URL = process.env.DB_URL
+export const DB_URL = process.env.MONGODB_URI
 export const PORT = process.env.port
 
 if (!DB_URL || !PORT) {

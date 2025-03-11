@@ -153,7 +153,7 @@ describe('DELETE /orders/:id', () => {
         const order = await createValidOrder(server);
 
         const deleteResponse = await request(server)
-            .delete(`/orders/${order._id}`);
+            .delete(`/orders/${order.id}`);
 
         expect(deleteResponse.status).toBe(200);
         expect(deleteResponse.text).toBe('Order deleted');
@@ -189,10 +189,10 @@ describe('POST /orders/:id/complete', () => {
         const order = await createValidOrder(server);
 
         const completeResponse = await request(server)
-            .post(`/orders/${order._id}/complete`);
+            .post(`/orders/${order.id}/complete`);
 
         expect(completeResponse.status).toBe(200);
-        expect(completeResponse.text).toBe(`Order with id ${order._id} completed`);
+        expect(completeResponse.text).toBe(`Order with id ${order.id} completed`);
     });
 
     it('does not allow to complete a non-existing order', async () => {
@@ -206,10 +206,10 @@ describe('POST /orders/:id/complete', () => {
     it('does not allow to complete an order with status different than CREATED', async () => {
         const order = await createValidOrder(server);
         await request(server)
-            .post(`/orders/${order._id}/complete`);
+            .post(`/orders/${order.id}/complete`);
 
         const completeResponse = await request(server)
-            .post(`/orders/${order._id}/complete`);
+            .post(`/orders/${order.id}/complete`);
 
         expect(completeResponse.status).toBe(400);
         expect(completeResponse.text).toBe(`Cannot complete an order with status: COMPLETED`);
@@ -237,7 +237,7 @@ describe('PUT /orders/:id', () => {
         const order = await createValidOrder(server);
 
         const updateResponse = await request(server)
-            .put(`/orders/${order._id}`)
+            .put(`/orders/${order.id}`)
             .send({ status: OrderStatus.Completed });
 
         expect(updateResponse.status).toBe(200);
@@ -248,7 +248,7 @@ describe('PUT /orders/:id', () => {
         const order = await createValidOrder(server);
 
         const updateResponse = await request(server)
-            .put(`/orders/${order._id}`)
+            .put(`/orders/${order.id}`)
             .send({ discountCode: 'DISCOUNT20' });
 
         expect(updateResponse.status).toBe(200);
@@ -259,7 +259,7 @@ describe('PUT /orders/:id', () => {
         const order = await createValidOrder(server);
 
         const updateResponse = await request(server)
-            .put(`/orders/${order._id}`)
+            .put(`/orders/${order.id}`)
             .send({ shippingAddress: 'New Address' });
 
         expect(updateResponse.status).toBe(200);

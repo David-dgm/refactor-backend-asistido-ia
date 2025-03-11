@@ -4,6 +4,7 @@ import {OrderStatus} from "../../domain/models";
 import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
 import {Order} from "../../domain/entities";
 import {DomainError} from "../../domain/error";
+import {Factory} from "../../factory";
 
 // Create a new order
 export const createOrder = async (req: Request, res: Response) => {
@@ -37,11 +38,11 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 };
 
-// Get all orders
 export const getAllOrders = async (_req: Request, res: Response) => {
-    console.log("GET /orders");
-    const orders = await OrderModel.find();
-    res.json(orders);
+    const repo = await Factory.getOrderRepository();
+    const orders = await repo.findAll();
+    const ordersDto = orders.map(order => order.toDto());
+    res.json(ordersDto);
 };
 
 // Update order
