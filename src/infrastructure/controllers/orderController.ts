@@ -76,17 +76,21 @@ export const updateOrder = async (req: Request, res: Response) => {
     }
 };
 
+async function completeOrderUseCase(repo: OrderRepository, id: string) {
+    const order = await repo.findById(Id.from(id)) as Order;
+    if (!order) {
+        throw new DomainError('Order not found to complete');
+    }
+    order.complete();
+    await repo.save(order);
+    return `Order with id ${order.toDto().id} completed`;
+}
+
 export const completeOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
         const { id } = req.params;
-        const order = await repo.findById(Id.from(id));
-        if (!order) {
-            throw new DomainError('Order not found to complete');
-        }
-        order.complete();
-        await repo.save(order);
-        res.send(`Order with id ${order.toDto().id} completed`);
+        res.send(await completeOrderUseCase(repo, id));
     }
     catch (error) {
         if(error instanceof DomainError) {
