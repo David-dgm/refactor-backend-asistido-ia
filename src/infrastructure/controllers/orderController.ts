@@ -1,33 +1,13 @@
 import {Request, Response} from 'express';
-import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
-import {Order} from "../../domain/entities";
 import {DomainError} from "../../domain/error";
 import {Factory} from "../../factory";
-import {OrderRepository} from "../../domain/repositories";
-
-async function createOrderUseCase(requestOrder, repo: OrderRepository) {
-    const orderLines = requestOrder.items.map((item) => (
-        new OrderLine(
-            Id.from(item.productId),
-            PositiveNumber.create(item.quantity),
-            PositiveNumber.create(item.price)
-        )
-    ));
-    const order = Order.create(orderLines, Address.create(requestOrder.shippingAddress), requestOrder.discountCode);
-    await repo.save(order);
-    return `Order created with total: ${order.calculatesTotal().value}`;
-}
-
-async function getAllOrdersUseCase(repo: OrderRepository) {
-    const orders = await repo.findAll();
-    return orders.map(order => order.toDto());
-}
+import {OrderUseCase} from "../../application/orderUseCase";
 
 export const createOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
         const requestOrder = req.body;
-        const result = await createOrderUseCase(requestOrder, repo);
+        const result = await new OrderUseCase(repo).createOrder(requestOrder);
         res.send(result);
     }
     catch (error) {
@@ -40,33 +20,15 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const getAllOrders = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
-    const ordersDto = await getAllOrdersUseCase(repo);
+    const ordersDto = await new OrderUseCase(repo).getAllOrders();
     res.json(ordersDto);
 };
-
-async function updateOrderUseCase(repo: OrderRepository, requestOrderUpdate) {
-    const order = await repo.findById(Id.from(requestOrderUpdate.id)) as Order
-    if (!order) {
-        throw new DomainError('Order not found');
-    }
-    if (requestOrderUpdate.shippingAddress) {
-        order.updateShippingAddress(Address.create(requestOrderUpdate.shippingAddress));
-    }
-    if (requestOrderUpdate.status) {
-        order.updateStatus(requestOrderUpdate.status);
-    }
-    if (requestOrderUpdate.discountCode) {
-        order.updateDiscountCode(requestOrderUpdate.discountCode);
-    }
-    await repo.save(order);
-    return `Order updated. New status: ${order.toDto().status}`;
-}
 
 export const updateOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
         const requestOrderUpdate = {...req.body, id: req.params.id};
-        res.send(await updateOrderUseCase(repo, requestOrderUpdate));
+        res.send(await new OrderUseCase(repo).updateOrder(requestOrderUpdate));
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -76,21 +38,11 @@ export const updateOrder = async (req: Request, res: Response) => {
     }
 };
 
-async function completeOrderUseCase(repo: OrderRepository, id: string) {
-    const order = await repo.findById(Id.from(id)) as Order;
-    if (!order) {
-        throw new DomainError('Order not found to complete');
-    }
-    order.complete();
-    await repo.save(order);
-    return `Order with id ${order.toDto().id} completed`;
-}
-
 export const completeOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
         const { id } = req.params;
-        res.send(await completeOrderUseCase(repo, id));
+        res.send(await new OrderUseCase(repo).completeOrder(id));
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -104,12 +56,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
     try{
         const repo = await Factory.getOrderRepository();
         const { id } = req.params;
-        const order = await repo.findById(Id.from(id));
-        if (!order) {
-            throw new DomainError('Order not found');
-        }
-        await repo.delete(order.getId());
-        let result = 'Order deleted';
+        let result = await new OrderUseCase(repo).deleteOrder(id);
         res.send(result);
     }catch (error){
         if(error instanceof DomainError) {
