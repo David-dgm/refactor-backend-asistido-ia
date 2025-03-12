@@ -14,7 +14,7 @@ describe('Status endpoint', () => {
         const dbUrl = process.env.MONGODB_URI;
         const port = process.env.PORT;
         console.log('DB URL:', dbUrl);
-        server = await createServer(Number(port), dbUrl as string);
+        server = await createServer(Number(port));
     });
 
     afterAll(() => {
@@ -34,7 +34,7 @@ describe('POST /orders', () => {
 
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
-        server = await createServer(3002, dbUrl);
+        server = await createServer(3002);
         await mongoose.connection.dropDatabase();
     });
 
@@ -101,7 +101,7 @@ describe('GET /orders', () => {
 
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
-        server = await createServer(3003, dbUrl);
+        server = await createServer(3003);
         await mongoose.connection.dropDatabase();
     });
 
@@ -137,7 +137,7 @@ describe('DELETE /orders/:id', () => {
 
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
-        server = await createServer(3004, dbUrl);
+        server = await createServer(3004);
         await mongoose.connection.dropDatabase();
     });
 
@@ -173,7 +173,7 @@ describe('POST /orders/:id/complete', () => {
 
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
-        server = await createServer(3005, dbUrl);
+        server = await createServer(3005);
         await mongoose.connection.dropDatabase();
     });
 
@@ -221,7 +221,7 @@ describe('PUT /orders/:id', () => {
 
     beforeAll(async () => {
         const dbUrl = process.env.MONGODB_URI as string;
-        server = await createServer(3006, dbUrl);
+        server = await createServer(3006);
         await mongoose.connection.dropDatabase();
     });
 

@@ -1,30 +1,27 @@
 import {Request, Response} from 'express';
 import {DomainError} from "../../domain/error";
-import {Factory} from "../../factory";
+import {OrderUseCase} from "../../application/orderUseCase";
 
-export const createOrder = async (req: Request, res: Response) => {
-    const orderUseCase = await Factory.createOrderUseCase();
+
+export const createOrder = async (orderUseCase: OrderUseCase, req: Request, res: Response) => {
     try {
         const requestOrder = req.body;
         const result = await orderUseCase.createOrder(requestOrder);
         res.send(result);
-    }
-    catch (error) {
-        if(error instanceof DomainError) {
+    } catch (error) {
+        if (error instanceof DomainError) {
             return res.status(400).send(error.message);
         }
         res.status(500).send("Unexpected error");
     }
 };
 
-export const getAllOrders = async (req: Request, res: Response) => {
-    const orderUseCase = await Factory.createOrderUseCase();
+export const getAllOrders = async (orderUseCase: OrderUseCase, req: Request, res: Response) => {
     const ordersDto = await orderUseCase.getAllOrders();
     res.json(ordersDto);
 };
 
-export const updateOrder = async (req: Request, res: Response) => {
-    const orderUseCase = await Factory.createOrderUseCase();
+export const updateOrder = async (orderUseCase: OrderUseCase, req: Request, res: Response) => {
     try {
         const requestOrderUpdate = {...req.body, id: req.params.id};
         res.send(await orderUseCase.updateOrder(requestOrderUpdate));
@@ -37,8 +34,7 @@ export const updateOrder = async (req: Request, res: Response) => {
     }
 };
 
-export const completeOrder = async (req: Request, res: Response) => {
-    const orderUseCase = await Factory.createOrderUseCase();
+export const completeOrder = async (orderUseCase: OrderUseCase, req: Request, res: Response) => {
     try {
         const { id } = req.params;
         res.send(await orderUseCase.completeOrder(id));
@@ -51,10 +47,11 @@ export const completeOrder = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteOrder = async (req: Request, res: Response) => {
-    const orderUseCase = await Factory.createOrderUseCase();
+export const deleteOrder = async (orderUseCase: OrderUseCase, req: Request, res: Response) => {
     try{
-        res.send(await orderUseCase.deleteOrder(req.params.id));
+        const { id } = req.params;
+        let result = await orderUseCase.deleteOrder(id);
+        res.send(result);
     }catch (error){
         if(error instanceof DomainError) {
             return res.status(400).send(error.message);

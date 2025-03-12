@@ -13,4 +13,4 @@ if (!DB_URL || !PORT) {
     process.exit(1);
 }
 
-createServer(Number(PORT), DB_URL);
+createServer(Number(PORT));
