@@ -77,7 +77,7 @@ export const updateOrder = async (req: Request, res: Response) => {
 };
 
 export const completeOrder = async (req: Request, res: Response) => {
-    console.log("POST /orders/:id/complete");
+    const repo = await Factory.getOrderRepository();
     try {
         const {id} = req.params;
         const orderDocument = await OrderModel.findById(id);
@@ -114,12 +114,19 @@ export const completeOrder = async (req: Request, res: Response) => {
 };
 
 export const deleteOrder = async (req: Request, res: Response) => {
-    const repo = await Factory.getOrderRepository();
-    const { id } = req.params;
-    const order = await repo.findById(Id.from(id));
-    if (!order) {
-        return res.status(400).send('Order not found')
+    try{
+        const repo = await Factory.getOrderRepository();
+        const { id } = req.params;
+        const order = await repo.findById(Id.from(id));
+        if (!order) {
+            throw new DomainError('Order not found');
+        }
+        await repo.delete(order.getId());
+        res.send('Order deleted');
+    }catch (error){
+        if(error instanceof DomainError) {
+            return res.status(400).send(error.message);
+        }
+        res.status(500).send("Unexpected error");
     }
-    await repo.delete(order.getId());
-    res.send('Order deleted');
 };
