@@ -1,13 +1,12 @@
 import {Request, Response} from 'express';
 import {DomainError} from "../../domain/error";
 import {Factory} from "../../factory";
-import {OrderUseCase} from "../../application/orderUseCase";
 
 export const createOrder = async (req: Request, res: Response) => {
-    const repo = await Factory.getOrderRepository();
+    const orderUseCase = await Factory.createOrderUseCase();
     try {
         const requestOrder = req.body;
-        const result = await new OrderUseCase(repo).createOrder(requestOrder);
+        const result = await orderUseCase.createOrder(requestOrder);
         res.send(result);
     }
     catch (error) {
@@ -19,16 +18,16 @@ export const createOrder = async (req: Request, res: Response) => {
 };
 
 export const getAllOrders = async (req: Request, res: Response) => {
-    const repo = await Factory.getOrderRepository();
-    const ordersDto = await new OrderUseCase(repo).getAllOrders();
+    const orderUseCase = await Factory.createOrderUseCase();
+    const ordersDto = await orderUseCase.getAllOrders();
     res.json(ordersDto);
 };
 
 export const updateOrder = async (req: Request, res: Response) => {
-    const repo = await Factory.getOrderRepository();
+    const orderUseCase = await Factory.createOrderUseCase();
     try {
         const requestOrderUpdate = {...req.body, id: req.params.id};
-        res.send(await new OrderUseCase(repo).updateOrder(requestOrderUpdate));
+        res.send(await orderUseCase.updateOrder(requestOrderUpdate));
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -39,10 +38,10 @@ export const updateOrder = async (req: Request, res: Response) => {
 };
 
 export const completeOrder = async (req: Request, res: Response) => {
-    const repo = await Factory.getOrderRepository();
+    const orderUseCase = await Factory.createOrderUseCase();
     try {
         const { id } = req.params;
-        res.send(await new OrderUseCase(repo).completeOrder(id));
+        res.send(await orderUseCase.completeOrder(id));
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -53,11 +52,9 @@ export const completeOrder = async (req: Request, res: Response) => {
 };
 
 export const deleteOrder = async (req: Request, res: Response) => {
+    const orderUseCase = await Factory.createOrderUseCase();
     try{
-        const repo = await Factory.getOrderRepository();
-        const { id } = req.params;
-        let result = await new OrderUseCase(repo).deleteOrder(id);
-        res.send(result);
+        res.send(await orderUseCase.deleteOrder(req.params.id));
     }catch (error){
         if(error instanceof DomainError) {
             return res.status(400).send(error.message);
