@@ -44,26 +44,29 @@ export const getAllOrders = async (req: Request, res: Response) => {
     res.json(ordersDto);
 };
 
+async function updateOrderUseCase(repo: OrderRepository, requestOrderUpdate) {
+    const order = await repo.findById(Id.from(requestOrderUpdate.id)) as Order
+    if (!order) {
+        throw new DomainError('Order not found');
+    }
+    if (requestOrderUpdate.shippingAddress) {
+        order.updateShippingAddress(Address.create(requestOrderUpdate.shippingAddress));
+    }
+    if (requestOrderUpdate.status) {
+        order.updateStatus(requestOrderUpdate.status);
+    }
+    if (requestOrderUpdate.discountCode) {
+        order.updateDiscountCode(requestOrderUpdate.discountCode);
+    }
+    await repo.save(order);
+    return `Order updated. New status: ${order.toDto().status}`;
+}
+
 export const updateOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
-        const { id } = req.params;
-        const order = await repo.findById(Id.from(id));
-        if (!order) {
-            throw new DomainError('Order not found');
-        }
-        const { status, shippingAddress, discountCode } = req.body;
-        if (shippingAddress) {
-            order.updateShippingAddress(Address.create(shippingAddress));
-        }
-        if(status) {
-            order.updateStatus(status);
-        }
-        if(discountCode) {
-            order.updateDiscountCode(discountCode);
-        }
-        await repo.save(order);
-        res.send(`Order updated. New status: ${order.toDto().status}`);
+        const requestOrderUpdate = {...req.body, id: req.params.id};
+        res.send(await updateOrderUseCase(repo, requestOrderUpdate));
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -102,7 +105,8 @@ export const deleteOrder = async (req: Request, res: Response) => {
             throw new DomainError('Order not found');
         }
         await repo.delete(order.getId());
-        res.send('Order deleted');
+        let result = 'Order deleted';
+        res.send(result);
     }catch (error){
         if(error instanceof DomainError) {
             return res.status(400).send(error.message);
