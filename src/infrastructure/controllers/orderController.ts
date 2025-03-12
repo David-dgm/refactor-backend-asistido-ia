@@ -18,6 +18,11 @@ async function createOrderUseCase(requestOrder, repo: OrderRepository) {
     return `Order created with total: ${order.calculatesTotal().value}`;
 }
 
+async function getAllOrdersUseCase(repo: OrderRepository) {
+    const orders = await repo.findAll();
+    return orders.map(order => order.toDto());
+}
+
 export const createOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
@@ -33,10 +38,9 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllOrders = async (_req: Request, res: Response) => {
+export const getAllOrders = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
-    const orders = await repo.findAll();
-    const ordersDto = orders.map(order => order.toDto());
+    const ordersDto = await getAllOrdersUseCase(repo);
     res.json(ordersDto);
 };
 
