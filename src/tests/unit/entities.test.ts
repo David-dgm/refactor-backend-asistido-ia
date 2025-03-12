@@ -145,4 +145,16 @@ describe("The order", ()=>{
 
         expect(order.toDto().discountCode).toBe("DISCOUNT20");
     });
+
+    it("updates the status of a given order", ()=>{
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(4)),
+        ];
+        const shippingAddress = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, shippingAddress);
+
+        order.updateStatus(OrderStatus.Completed);
+
+        expect(order.toDto().status).toBe(OrderStatus.Completed);
+    });
 })

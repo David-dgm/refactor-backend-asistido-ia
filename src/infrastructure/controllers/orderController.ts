@@ -1,25 +1,29 @@
-import { Request, Response } from 'express';
-import { OrderModel } from '../repositories/orderModel';
-import {OrderStatus} from "../../domain/models";
+import {Request, Response} from 'express';
 import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
 import {Order} from "../../domain/entities";
 import {DomainError} from "../../domain/error";
 import {Factory} from "../../factory";
+import {OrderRepository} from "../../domain/repositories";
+
+async function createOrderUseCase(requestOrder, repo: OrderRepository) {
+    const orderLines = requestOrder.items.map((item) => (
+        new OrderLine(
+            Id.from(item.productId),
+            PositiveNumber.create(item.quantity),
+            PositiveNumber.create(item.price)
+        )
+    ));
+    const order = Order.create(orderLines, Address.create(requestOrder.shippingAddress), requestOrder.discountCode);
+    await repo.save(order);
+    return `Order created with total: ${order.calculatesTotal().value}`;
+}
 
 export const createOrder = async (req: Request, res: Response) => {
     const repo = await Factory.getOrderRepository();
     try {
-        const {items, discountCode, shippingAddress} = req.body;
-        const orderLines = items.map((item) => (
-            new OrderLine(
-                Id.from(item.productId),
-                PositiveNumber.create(item.quantity),
-                PositiveNumber.create(item.price)
-            )
-        ));
-        const order = Order.create(orderLines, Address.create(shippingAddress), discountCode);
-        await repo.save(order);
-        res.send(`Order created with total: ${order.calculatesTotal().value}`);
+        const requestOrder = req.body;
+        const result = await createOrderUseCase(requestOrder, repo);
+        res.send(result);
     }
     catch (error) {
         if(error instanceof DomainError) {
@@ -36,44 +40,33 @@ export const getAllOrders = async (_req: Request, res: Response) => {
     res.json(ordersDto);
 };
 
-// Update order
 export const updateOrder = async (req: Request, res: Response) => {
-    console.log("PUT /orders/:id");
-    const { id } = req.params;
-    const { status, shippingAddress, discountCode } = req.body;
-
-    const order = await OrderModel.findById(id);
-    if (!order) {
-        return res.status(400).send('Order not found');
-    }
-
-    if (shippingAddress) {
-        order.shippingAddress = shippingAddress;
-    }
-
-    if (status) {
-        if (status === OrderStatus.Completed && order.items.length === 0) {
-            return res.send('Cannot complete an order without items');
+    const repo = await Factory.getOrderRepository();
+    try {
+        const { id } = req.params;
+        const order = await repo.findById(Id.from(id));
+        if (!order) {
+            throw new DomainError('Order not found');
         }
-        order.status = status;
-    }
-
-    if (discountCode) {
-        order.discountCode = discountCode;
-        if (discountCode === 'DISCOUNT20') {
-            let newTotal = 0;
-            for (const item of order.items) {
-                newTotal += (item.price || 0) * (item.quantity || 0);
-            }
-            newTotal *= 0.8;
-            order.total = newTotal;
-        } else {
-            console.log('Invalid or not implemented discount code');
+        const { status, shippingAddress, discountCode } = req.body;
+        if (shippingAddress) {
+            order.updateShippingAddress(Address.create(shippingAddress));
         }
+        if(status) {
+            order.updateStatus(status);
+        }
+        if(discountCode) {
+            order.updateDiscountCode(discountCode);
+        }
+        await repo.save(order);
+        res.send(`Order updated. New status: ${order.toDto().status}`);
     }
-
-    await order.save();
-    res.send(`Order updated. New status: ${order.status}`);
+    catch (error) {
+        if(error instanceof DomainError) {
+            return res.status(400).send(error.message);
+        }
+        res.status(500).send("Unexpected error");
+    }
 };
 
 export const completeOrder = async (req: Request, res: Response) => {

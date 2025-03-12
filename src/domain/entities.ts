@@ -89,5 +89,9 @@ export class Order{
     getId() {
         return this.id;
     }
+
+    updateStatus(status: OrderStatus) {
+        this.status = status;
+    }
 }
 
