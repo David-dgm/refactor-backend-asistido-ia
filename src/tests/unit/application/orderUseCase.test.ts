@@ -45,11 +45,7 @@ describe("The Order Use Case", () => {
     });
 
     it("updates an order for a given order update request", async ()=>{
-        const items = [
-            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
-        ];
-        const address = Address.create("Irrelevant Street 123");
-        const order = Order.create(items, address);
+        const order = createValidOrder();
         const repository = new InMemoryOrderRepository();
         await repository.save(order);
 
@@ -65,4 +61,26 @@ describe("The Order Use Case", () => {
         expect(updatedOrder?.toDto().status).toBe(OrderStatus.Completed);
         expect(updatedOrder?.toDto().shippingAddress).toBe("New Address");
     });
+
+    it("gets all orders", async ()=>{
+        const order = createValidOrder();
+        const repository = new InMemoryOrderRepository();
+        await repository.save(order);
+
+        const useCase = new OrderUseCase(repository);
+        const orders = await useCase.getAllOrders();
+
+        expect(orders.length).toBe(1);
+    });
+
+
+
 });
+
+function createValidOrder() {
+    const items = [
+        new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+    ];
+    const address = Address.create("Irrelevant Street 123");
+    return Order.create(items, address);
+}
