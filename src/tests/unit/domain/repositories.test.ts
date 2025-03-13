@@ -4,16 +4,20 @@ import {Address, Id, OrderLine, PositiveNumber} from "../../../domain/valueObjec
 
 export class InMemoryOrderRepository implements OrderRepository {
     private orders: Order[] = [];
-    findAll(): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+
+    async findAll(): Promise<Order[]> {
+       return this.orders;
     }
+
     async findById(id: Id): Promise<Order | undefined> {
         return this.orders.find(order => order.getId().equals(id));
     }
+
     async save(order: Order): Promise<void> {
         this.orders.push(order);
     }
-    delete(id: Id): Promise<void> {
+
+    async delete(id: Id): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }
@@ -31,5 +35,20 @@ describe('The Order Repository', () => {
 
         const savedOrder = await repository.findById(order.getId());
         expect(savedOrder?.toDto()).toEqual(order.toDto());
+    });
+
+    it('finds all previously saved orders', async () => {
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const address = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, address);
+        const repository = new InMemoryOrderRepository();
+
+        await repository.save(order);
+
+        const orders = await repository.findAll();
+        expect(orders.length).toBe(1);
+        expect(orders[0].toDto()).toEqual(order.toDto());
     });
 });
