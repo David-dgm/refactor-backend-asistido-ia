@@ -1,6 +1,8 @@
 import {OrderUseCase, RequestOrder} from "../../../application/orderUseCase";
 import {InMemoryOrderRepository} from "../../../domain/repositories";
 import {OrderStatus} from "../../../domain/models";
+import {Address, Id, OrderLine, PositiveNumber} from "../../../domain/valueObjects";
+import {Order} from "../../../domain/entities";
 
 describe("The Order Use Case", () => {
     it("creates an new order for a given order request", async ()=>{
@@ -40,5 +42,27 @@ describe("The Order Use Case", () => {
         expect(result).toBe("Order created with total: 32");
         const orders = await repo.findAll();
         expect(orders.length).toBe(1);
+    });
+
+    it("updates an order for a given order update request", async ()=>{
+        const items = [
+            new OrderLine(Id.create(), PositiveNumber.create(2), PositiveNumber.create(3)),
+        ];
+        const address = Address.create("Irrelevant Street 123");
+        const order = Order.create(items, address);
+        const repository = new InMemoryOrderRepository();
+        await repository.save(order);
+
+        const useCase = new OrderUseCase(repository);
+        const result = await useCase.updateOrder({
+            id: order.getId().value,
+            status: OrderStatus.Completed,
+            shippingAddress: "New Address",
+        });
+
+        expect(result).toBe("Order updated. New status: COMPLETED");
+        const updatedOrder = await repository.findById(order.getId());
+        expect(updatedOrder?.toDto().status).toBe(OrderStatus.Completed);
+        expect(updatedOrder?.toDto().shippingAddress).toBe("New Address");
     });
 });
