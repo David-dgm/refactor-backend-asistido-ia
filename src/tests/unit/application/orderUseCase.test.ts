@@ -86,6 +86,19 @@ describe("The Order Use Case", () => {
         expect(completedOrder?.toDto().status).toBe(OrderStatus.Completed);
     });
 
+    it("deletes an order", async ()=>{
+        const order = createValidOrder();
+        const repository = new InMemoryOrderRepository();
+        await repository.save(order);
+        const useCase = new OrderUseCase(repository);
+        const ordersBeforeDelete = await repository.findAll();
+        expect(ordersBeforeDelete.length).toBe(1);
+
+        await useCase.deleteOrder(order.getId().value);
+
+        const orders = await repository.findAll();
+        expect(orders.length).toBe(0);
+    });
 });
 
 function createValidOrder() {
