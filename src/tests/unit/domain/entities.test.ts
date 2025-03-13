@@ -1,6 +1,6 @@
-import {Order} from "../../domain/entities";
-import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
-import {OrderStatus} from "../../domain/models";
+import {Order} from "../../../domain/entities";
+import {Address, Id, OrderLine, PositiveNumber} from "../../../domain/valueObjects";
+import {OrderStatus} from "../../../domain/models";
 
 describe("The order", ()=>{
     it("creates an order with the given fields are valid", ()=>{

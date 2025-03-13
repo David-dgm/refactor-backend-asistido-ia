@@ -42,6 +42,10 @@ export class Id{
     static from(value: string): Id {
         return new Id(value);
     }
+
+    equals(id: Id): boolean {
+        return this.value === id.value;
+    }
 }
 
 export class OrderLine{

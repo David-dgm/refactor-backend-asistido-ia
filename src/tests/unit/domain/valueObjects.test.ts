@@ -1,4 +1,4 @@
-import {Address, Id, OrderLine, PositiveNumber} from "../../domain/valueObjects";
+import {Address, Id, OrderLine, PositiveNumber} from "../../../domain/valueObjects";
 
 describe("A positive number", () => {
     it("allows positive values", ()=>{

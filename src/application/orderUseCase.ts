@@ -9,6 +9,7 @@ type RequestOrder = {
     discountCode: DiscountCode;
     shippingAddress: string;
 }
+
 type RequestOrderUpdate = {
     id: string;
     status: OrderStatus;
