@@ -1,5 +1,6 @@
 import {OrderUseCase, RequestOrder} from "../../../application/orderUseCase";
 import {InMemoryOrderRepository} from "../../../domain/repositories";
+import {OrderStatus} from "../../../domain/models";
 
 describe("The Order Use Case", () => {
     it("creates an new order for a given order request", async ()=>{
@@ -12,9 +13,9 @@ describe("The Order Use Case", () => {
             shippingAddress: "123 Main St",
         };
         const repo = new InMemoryOrderRepository();
-        const order = new OrderUseCase(repo);
+        const useCase = new OrderUseCase(repo);
         // Act
-        const result = await order.createOrder(requestOrder);
+        const result = await useCase.createOrder(requestOrder);
         // Assert
         expect(result).toBe("Order created with total: 40");
         const orders = await repo.findAll();
@@ -32,14 +33,12 @@ describe("The Order Use Case", () => {
             shippingAddress: "123 Main St",
         };
         const repo = new InMemoryOrderRepository();
-        const order = new OrderUseCase(repo);
+        const useCase = new OrderUseCase(repo);
         // Act
-        const result = await order.createOrder(requestOrder);
+        const result = await useCase.createOrder(requestOrder);
         // Assert
         expect(result).toBe("Order created with total: 32");
         const orders = await repo.findAll();
         expect(orders.length).toBe(1);
     });
-
-    
 });
