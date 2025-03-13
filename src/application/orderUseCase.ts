@@ -4,17 +4,17 @@ import {Order} from "../domain/entities";
 import {DomainError} from "../domain/error";
 import {DiscountCode, OrderStatus} from "../domain/models";
 
-type RequestOrder = {
+export type RequestOrder = {
     items: { productId: string; quantity: number; price: number }[];
-    discountCode: DiscountCode;
+    discountCode?: DiscountCode;
     shippingAddress: string;
 }
 
-type RequestOrderUpdate = {
+export type RequestOrderUpdate = {
     id: string;
     status: OrderStatus;
     shippingAddress: string;
-    discountCode: DiscountCode;
+    discountCode?: DiscountCode;
 }
 
 export class OrderUseCase {
